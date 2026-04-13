@@ -29,7 +29,7 @@ The RHTPA Ansible collection deploys the following RHTPA components:
 * Python 3.10.0 or greater.
 * Red Hat Enterprise Linux 9.3 or greater for the x86_64 architecture.
 * Installation and configuration of Ansible on a control node to perform the automation.
-* External services:
+* External services (see [External services](#external-services) section below):
    * An OpenID Connect (OIDC) provider.
    * A new PostgreSQL database.
 
@@ -37,9 +37,12 @@ The RHTPA Ansible collection deploys the following RHTPA components:
 
 ### OIDC providers
 
-* [Red Hat Single Sign-On](https://access.redhat.com/products/red-hat-single-sign-on/)
-* [Setup RHSSO](https://github.com/trustification/trustify/blob/main/docs/book/modules/admin/pages/infrastructure.adoc#keycloak)
-* [Setup AWS Cognito](https://github.com/trustification/trustify/blob/main/docs/book/modules/admin/pages/infrastructure.adoc)
+RHTPA supports the following OIDC providers:
+
+* [Red Hat Single Sign-On](https://access.redhat.com/products/red-hat-single-sign-on/) (Keycloak)
+* AWS Cognito
+
+For more information about OIDC configuration, see the [Red Hat Trusted Profile Analyzer Documentation](https://docs.redhat.com/en/documentation/red_hat_trusted_profile_analyzer/2.2/).
 
 ### PostgreSQL database
 
@@ -54,18 +57,57 @@ The following steps guide you on how to configure, and provision RHTPA to run on
 
 On the controller node, export the following environment variables replacing the placeholders with your relevant information:
 
+**Required environment variables:**
+
 ```
 export TPA_SINGLE_NODE_REGISTRY_USERNAME=<Your Red Hat image registry username>
 export TPA_SINGLE_NODE_REGISTRY_PASSWORD=<Your Red Hat image registry password>
 export TPA_PG_HOST=<POSTGRES HOST IP>
+export TPA_PG_DB=<POSTGRES DATABASE NAME>
 export TPA_PG_ADMIN=<DB ADMIN>
 export TPA_PG_ADMIN_PASSWORD=<DB ADMIN PASSWORD>
 export TPA_PG_USER=<DB USER>
 export TPA_PG_USER_PASSWORD=<DB PASSWORD>
-export TPA_OIDC_ISSUER_URL=<AWS Cognito or Keycloak Issuer URL. Incase of Keycloak endpoint auth/realms/chicken is needed>
+export TPA_OIDC_ISSUER_URL=<AWS Cognito or Keycloak Issuer URL>
+# Note: In case of Keycloak, the endpoint should include auth/realms/<realm-name>
 export TPA_OIDC_FRONTEND_ID=<OIDC Frontend Id>
-export TPA_OIDC_PROVIDER_CLIENT_ID=<OIDC Walker Id>
-export TPA_OIDC_PROVIDER_CLIENT_SECRET=<OIDC Walker Secret>
+export TPA_OIDC_CLIENT_ID=<OIDC Walker Id>
+export TPA_OIDC_CLIENT_SECRET=<OIDC Walker Secret>
+```
+
+**Optional environment variables:**
+
+Storage configuration (S3/Minio):
+```
+export TPA_STORAGE_ACCESS_KEY=<S3/Minio access key>
+export TPA_STORAGE_SECRET_KEY=<S3/Minio secret key>
+export TPA_STORAGE_BUCKET=<S3/Minio bucket name>
+export TPA_STORAGE_REGION=<S3/Minio region>
+export TPA_STORAGE_TRUST_ANCHORS=<Storage trust anchors>
+```
+
+Additional OIDC configuration:
+```
+export TPA_OIDC_TLS_INSECURE=<true/false, default: false>
+export TPA_OIDC_USER_INFO=<true/false, default: true>
+export TPA_OIDC_UI_SCOPE=<OIDC UI scope, default: empty>
+```
+
+Database configuration:
+```
+export TPA_PG_SSL_MODE=<SSL mode, default: require>
+```
+
+Server limits:
+```
+export TPA_SERVER_REQ_LIMIT=<Server request limit>
+export TPA_SERVER_JSON_LIMIT=<Server JSON limit>
+export TPA_SERVER_UPLOAD_LIMIT=<Server upload limit>
+```
+
+UI configuration:
+```
+export TPA_UI_TLS=<true/false, default: true>
 ```
 
 Choose between Keycloak or AWS Cognito, and update the `roles/tpa_single_node/defaults/main.yml` file accordingly.
@@ -134,34 +176,33 @@ tpa_single_node_tls_server_cert
 tpa_single_node_tls_server_key
 ```
 
-Refer `roles/tpa_single_node/vars/main_example_aws.yml` and `roles/tpa_single_node/vars/main_example_nonaws.yml` for more details.
+Refer to `roles/tpa_single_node/vars/main_example_aws.yml` and `roles/tpa_single_node/vars/main_example_nonaws.yml` for more details.
 
-Run the Ansible Playbook:
+### Running the playbook
+
+The `play.yml` playbook in the root of this collection orchestrates the deployment of RHTPA. Run it with:
 
 ```
-export ANSIBLE_ROLES_PATH="roles/" ;
+export ANSIBLE_ROLES_PATH="roles/"
 ansible-playbook -i inventory.ini play.yml -vv
 ```
 
 ## Contributing
 
+Contributions are welcome! Please submit an [Issue](https://github.com/trustification/trustify-ansible/issues) or [Pull Request](https://github.com/trustification/trustify-ansible/pulls) for any bugs, features, or improvements.
+
 ## Support
 
-Support tickets for RedHat Trusted Profile Analyzer can be opened at https://access.redhat.com/support/cases/#/case/new?product=Red%20Hat%20Trusted%20Profile%20Analyzer.
+Support tickets for Red Hat Trusted Profile Analyzer can be opened at [Red Hat Support](https://access.redhat.com/support/cases/#/case/new?product=Red%20Hat%20Trusted%20Profile%20Analyzer).
 
 ## Release notes and Roadmap
 
-You can read the latest release notes [here](https://docs.redhat.com/en/documentation/red_hat_trusted_profile_analyzer/2.0/html/release_notes/index).
+You can read the [latest release notes](https://docs.redhat.com/en/documentation/red_hat_trusted_profile_analyzer/2.2/html/release_notes/index).
 
 ## Related Information
 
-You can find more information about Red Hat Trusted Profile Analyzer [here](https://access.redhat.com/products/red-hat-trusted-profile-analyzer).
-
-## Feedback
-
-Any and all feedback is welcome.
-Submit an [Issue](https://github.com/trustification/trustify-ansible/issues) or [Pull Request](https://github.com/trustification/trustify-ansible/pulls) as needed.
+You can find more information at the [Red Hat Trusted Profile Analyzer product page](https://access.redhat.com/products/red-hat-trusted-profile-analyzer).
 
 ## License Information
 
-You can find license information within the [LICENSE](https://github.com/trustification/trustification-ansible/blob/main/LICENSE) file.
+You can find license information within the [LICENSE](https://github.com/trustification/trusted-profile-analyzer-ansible/blob/main/LICENSE) file.

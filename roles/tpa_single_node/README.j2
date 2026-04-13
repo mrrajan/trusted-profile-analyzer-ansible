@@ -4,7 +4,17 @@
 {%- if "version" in galaxy_collection %}
 Version: {{ galaxy_collection.version }}
 {% endif %}
-{{ argument_specs["main"].description }} Requires RHEL 9.3 or later.
+{{ argument_specs["main"].description }}
+
+## Prerequisites
+
+- Red Hat Enterprise Linux (RHEL) 9.3 or later (x86_64 architecture)
+- Podman installed on the managed node
+- systemd available on the managed node
+- A running PostgreSQL database instance (external)
+- An OIDC provider configured (Red Hat Single Sign-On/Keycloak, AWS Cognito, etc.)
+- An S3-compatible storage backend (for storage-related features)
+- TLS certificates (root CA, server certificate, and server private key)
 
 ## Role Arguments
 {% set path, options=entrypoint_options["main"][0] -%}
